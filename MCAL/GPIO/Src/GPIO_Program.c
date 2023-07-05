@@ -100,9 +100,8 @@ uint8_t GPIO_u8SetPinStatus(Port_t Port,Pin_t Pin,PinVal_t State )
 /*
  * @function		GPIO_u8ReadPinStatus
  * @brief			Reading value of selected pin
- * @param[in]		Port Number
- * 					Pin Number
- * 					Address of state Variable
+ * @param[in]		Port Number , Pin Number
+ * @param[out]		Address of state Variable
  * @retval			ErrorState
  */
 uint8_t GPIO_u8ReadPinStatus(Port_t Port,Pin_t Pin, PinVal_t * State )

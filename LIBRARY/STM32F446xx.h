@@ -20,6 +20,7 @@
 
 /************************     	 CORE PERIPHERALS BASE ADDRESSES	************************/
 #define SYSTICK_BASE_ADDRESS		0xE000E010UL
+#define NVIC_BASE_ADDRESS			0xE000E100UL
 
 
 /************************     	AHB 1 BASE PERIPHERALS ADDRESSES	************************/
@@ -68,14 +69,30 @@ typedef struct {
 
 typedef struct{
 
-	volatile uint32_t	CTRL;						/*SysTick control and status register*/
-	volatile uint32_t	LOAD;						/*SysTick Reload value register*/
-	volatile uint32_t	VAL;						/*SysTick Current value register*/
+	volatile uint32_t	CTRL;			/*SysTick control and status register*/
+	volatile uint32_t	LOAD;			/*SysTick Reload value register*/
+	volatile uint32_t	VAL;			/*SysTick Current value register*/
 
 }SYSTICK_REG_t;
 
 #define SYSTICK 					((SYSTICK_REG_t *)(SYSTICK_BASE_ADDRESS))
 
+/************************     	NVIC REGISTERS DEFINITION		************************/
+typedef struct
+{
+	volatile  uint32_t NVIC_ISER[8];
+	volatile  uint32_t RESERVED1[24];
+	volatile  uint32_t NVIC_ICER[8];
+	volatile  uint32_t RESERVED2[24];
+	volatile  uint32_t NVIC_ISPR[8];
+	volatile  uint32_t RESERVED3[24];
+	volatile  uint32_t NVIC_ICPR[8];
+	volatile  uint32_t RESERVED4[24];
+	volatile  uint32_t NVIC_IABR[8];
+	volatile  uint32_t RESERVED5[56];
+	volatile  uint32_t NVIC_IPR[60];
+}NVIC_REG_t;
+#define NVIC 	((NVIC_REG_t*)(NVIC_BASE_ADDRESS))
 /************************     	PERIPHERAL REGISTER BITS DEFINITION	************************/
 
 
