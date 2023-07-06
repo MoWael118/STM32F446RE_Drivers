@@ -6,43 +6,44 @@
 #ifndef NVIC_INC_NVIC_INTERFACE_H_
 #define NVIC_INC_NVIC_INTERFACE_H_
 
+#include "NVIC_Private.h"
 /***********************************
- * @function 		:	NVIC_u8EnableInt
+ * @function 		:	NVIC_u8EnableIRQ
  * @brief			:	Enable the NVIC Interrupt for specific IRQ
  * @parameter[in]	:	IRQ_Num
  * @retval			:	Error State
  */
 
-uint8_t NVIC_u8EnableInt(uint8_t IRQ_Num);
+uint8_t NVIC_u8EnableIRQ(uint8_t IRQ_Num);
 
 /***********************************
- * @function 		:	NVIC_u8DisableInt
+ * @function 		:	NVIC_u8DisableIRQ
  * @brief			:	Disable the NVIC Interrupt for specific IRQ
  * @parameter[in]	:	IRQ_Num
  * @retval			:	Error State
  */
 
-uint8_t NVIC_u8DisableInt(uint8_t IRQ_Num);
+uint8_t NVIC_u8DisableIRQ(uint8_t IRQ_Num);
 
 
 /***********************************
- * @function 		:	NVIC_u8SetPendFlag
+ * @function 		:	NVIC_u8SetPendingIRQ
  * @brief			:	Set the Interrupt Pending flag for specific IRQ
  * @parameter[in]	:	IRQ_Num
  * @retval			:	Error State
  */
 
-uint8_t NVIC_u8SetPendFlag(uint8_t IRQ_Num);
+uint8_t NVIC_u8SetPendingIRQ(uint8_t IRQ_Num);
 
 
 /***********************************
- * @function 		:	NVIC_u8ClearPendFlag
+ * @function 		:	NVIC_u8ClearPendingIRQ
  * @brief			:	Clear the Interrupt Pending flag for specific IRQ
  * @parameter[in]	:	IRQ_Num
  * @retval			:	Error State
  */
 
-uint8_t NVIC_u8ClearPendFlag(uint8_t IRQ_Num);
+uint8_t NVIC_u8ClearPendingIRQ(uint8_t IRQ_Num);
 
 
 /***********************************
@@ -53,7 +54,7 @@ uint8_t NVIC_u8ClearPendFlag(uint8_t IRQ_Num);
  * @retval			:	Error State
  */
 
-uint8_t NVIC_u8ReadActiveFlag(uint8_t IRQ_Num,uint8_t * Flag_Value);
+uint8_t NVIC_u8GetActiveIRQ(uint8_t IRQ_Num,uint8_t * Flag_Value);
 
 
 
