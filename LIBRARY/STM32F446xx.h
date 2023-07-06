@@ -80,17 +80,34 @@ typedef struct{
 /************************     	NVIC REGISTERS DEFINITION		************************/
 typedef struct
 {
-	volatile  uint32_t NVIC_ISER[8];
-	volatile  uint32_t RESERVED1[24];
-	volatile  uint32_t NVIC_ICER[8];
-	volatile  uint32_t RESERVED2[24];
-	volatile  uint32_t NVIC_ISPR[8];
-	volatile  uint32_t RESERVED3[24];
-	volatile  uint32_t NVIC_ICPR[8];
-	volatile  uint32_t RESERVED4[24];
-	volatile  uint32_t NVIC_IABR[8];
-	volatile  uint32_t RESERVED5[56];
-	volatile  uint32_t NVIC_IPR[60];
+	volatile  uint32_t NVIC_ISER[8]; 	/*The NVIC_ISER0-NVIC_ISER7 registers enable interrupts,
+										and show which interrupts are enabled.*/
+
+	volatile  uint32_t RESERVED1[24];	/*Reserved*/
+
+	volatile  uint32_t NVIC_ICER[8];	/*The NVIC_ICER0-NVIC_ICER7 registers disable interrupts
+										and show which interrupts are enabled*/
+
+	volatile  uint32_t RESERVED2[24];   /*Reserved*/
+
+	volatile  uint32_t NVIC_ISPR[8];	/*The NVIC_ISPR0-NVIC_ISPR7 registers force interrupts into the pending state,
+	 	 	 	 	 	 	 	 	 	 and show which interrupts are pending.*/
+
+	volatile  uint32_t RESERVED3[24];	/*Reserved*/
+
+	volatile  uint32_t NVIC_ICPR[8];	/*The NVIC_ICPR0-NCVIC_ICPR7 registers remove the pending state from interrupts,
+	 	 	 	 	 	 	 	 	 	 and show which interrupts are pending*/
+
+	volatile  uint32_t RESERVED4[24];	/*REserved*/
+
+	volatile  uint32_t NVIC_IABR[8];	/*The NVIC_IABR0-NVIC_IABR7 registers indicate
+	 	 	 	 	 	 	 	 	 	 which interrupts are active. */
+
+	volatile  uint32_t RESERVED5[56];	/*Reserved*/
+
+	volatile  uint32_t NVIC_IPR[60];	/*The NVIC_IPR0-NVIC_IPR59 registers provide an 8-bit priority field for each interrupt
+										and each register holds four priority fields. */
+
 }NVIC_REG_t;
 #define NVIC 	((NVIC_REG_t*)(NVIC_BASE_ADDRESS))
 /************************     	PERIPHERAL REGISTER BITS DEFINITION	************************/
