@@ -125,3 +125,37 @@ uint8_t NVIC_u8GetActiveIRQ(uint8_t IRQ_Num,uint8_t * Flag_Value)
 	}
 	return Error_State;
 }
+
+/***********************************
+ * @function 		:	NVIC_u8SetIRQPriority
+ * @brief			:	Set a priority to the Given IRQ
+ * @parameter[in]	:	IRQ_Num , PriorityValue
+ * @retval			:	Error State
+ * @warning 		: 	before using this function , Grouping type must be determined
+ * 						through ( SCB_u8SetPriorityGrouping ) Function.
+ */
+
+uint8_t NVIC_u8SetIRQPriority(uint8_t IRQ_Num,uint8_t PriorityValue)
+{
+
+	uint8_t Error_State = OK;
+	if (IRQ_Num >=0 && IRQ_Num<97)
+	{
+		if (PriorityValue<MAX_PRIORITY)
+		{
+
+		NVIC->NVIC_IPR[IRQ_Num] = PriorityValue<<PRIORITY_POSITION;
+
+		}
+		else
+		{
+			Error_State = WRONG_PRIORITY_NUM;
+		}
+	}
+	else
+	{
+		Error_State = WRONG_IRQ_NUM;
+	}
+	return Error_State;
+}
+
