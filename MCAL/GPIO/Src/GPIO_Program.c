@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-
 #include "../../../LIBRARY/ErrTypes.h"
 #include "../../../LIBRARY/STM32F446xx.h"
 
@@ -38,7 +37,7 @@ uint8_t GPIO_u8PinInit(PinConfig_t * Pin_Config)
 			GPIO_PORT[Pin_Config->Port_Num]->PUPDR &= ~ (PUPDR_MASK << (PUPDR_PIN_ACCESS * (Pin_Config->Pin_Num)));/*Clear the PINS from old values*/
 			GPIO_PORT[Pin_Config->Port_Num]->PUPDR |= (Pin_Config->PullType)<<((PUPDR_PIN_ACCESS * (Pin_Config->Pin_Num)));	/*Set the new VAlue*/
 			/*********if Output or AF set output speed & type**********/
-			if ((Pin_Config->Mode == OUTPUT) ||(Pin_Config->Mode == ALT_FUNC))
+			if ((Pin_Config->Mode == MODE_OUTPUT) ||(Pin_Config->Mode == MODE_ALT_FUNC))
 			{
 				/**************Set OUTPUT Speed******************/
 				GPIO_PORT[Pin_Config->Port_Num]->OSPEEDR &= ~ (OSPEEDR_MASK<<((Pin_Config->Pin_Num)*OSPEEDR_PIN_ACCESS));/*Clear the PINS from old values*/
@@ -47,7 +46,7 @@ uint8_t GPIO_u8PinInit(PinConfig_t * Pin_Config)
 				GPIO_PORT[Pin_Config->Port_Num]->OTYPER &= ~ (OTYPER_MASK<<((Pin_Config->Pin_Num)*OTYPER_PIN_ACCESS));/*Clear the PINS from old values*/
 				GPIO_PORT[Pin_Config->Port_Num]->OTYPER |= ((Pin_Config->Output_Type)<<((Pin_Config->Pin_Num)*OTYPER_PIN_ACCESS));/*Set the new VALUE*/
 				/***********if AF Set the functionality**********/
-				if (Pin_Config->Mode == ALT_FUNC)
+				if (Pin_Config->Mode == MODE_ALT_FUNC)
 				{
 					GPIO_PORT[Pin_Config->Port_Num]->AFR[(Pin_Config->Pin_Num)/8u] &= ~ (AFR_MASK<<(((Pin_Config->Pin_Num)%8u) * AFR_PIN_ACCESS));/*Clear the PINS from old values*/
 					GPIO_PORT[Pin_Config->Port_Num]->AFR[(Pin_Config->Pin_Num)/8u] |=  ((Pin_Config->AltFunc)<<(((Pin_Config->Pin_Num)%8u) * AFR_PIN_ACCESS));/*Set the new VALUE*/
