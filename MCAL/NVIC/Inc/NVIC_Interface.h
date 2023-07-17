@@ -56,6 +56,16 @@ uint8_t NVIC_u8ClearPendingIRQ(uint8_t IRQ_Num);
 
 uint8_t NVIC_u8GetActiveIRQ(uint8_t IRQ_Num,uint8_t * Flag_Value);
 
+/***********************************
+ * @function 		:	NVIC_u8SetIRQPriority
+ * @brief			:	Set a priority to the Given IRQ
+ * @parameter[in]	:	IRQ_Num , PriorityValue
+ * @retval			:	Error State
+ * @warning 		: 	before using this function , Grouping type must be determined
+ * 						through ( SCB_u8SetPriorityGrouping ) Function.
+ */
+
+uint8_t NVIC_u8SetIRQPriority(uint8_t IRQ_Num,uint8_t PriorityValue);
 
 
 #endif /* NVIC_INC_NVIC_INTERFACE_H_ */
