@@ -106,5 +106,7 @@ enum IRQ_Numbers {
 	NVIC_FMPI2C1             ,
 	NVIC_FMPI2C1_error
 };
+#define PRIORITY_POSITION 		4
+#define MAX_PRIORITY			16
 
 #endif /* NVIC_INC_NVIC_PRIVATE_H_ */
