@@ -21,6 +21,7 @@
 /************************     	 CORE PERIPHERALS BASE ADDRESSES	************************/
 #define SYSTICK_BASE_ADDRESS		0xE000E010UL
 #define NVIC_BASE_ADDRESS			0xE000E100UL
+#define SCB_BASE_ADDRESS			0xE000E008UL
 
 
 /************************     	AHB 1 BASE PERIPHERALS ADDRESSES	************************/
@@ -105,11 +106,75 @@ typedef struct
 
 	volatile  uint32_t RESERVED5[56];	/*Reserved*/
 
-	volatile  uint32_t NVIC_IPR[60];	/*The NVIC_IPR0-NVIC_IPR59 registers provide an 8-bit priority field for each interrupt
+	volatile  uint8_t  NVIC_IPR[240];	/*The NVIC_IPR0-NVIC_IPR59 registers provide an 8-bit priority field for each interrupt
 										and each register holds four priority fields. */
 
 }NVIC_REG_t;
 #define NVIC 	((NVIC_REG_t*)(NVIC_BASE_ADDRESS))
+
+/************************     	SCB REGISTERS DEFINITION		************************/
+
+typedef struct {
+
+	volatile uint32_t SCB_ACTLR;	    /* The ACTLR register provides disable
+								   	       bits for the following processor functions:
+									    	• IT folding
+									    	• write buffer use for accesses to the default memory map
+									    	• interruption of multi-cycle instructions*/
+
+	volatile uint32_t RESERVED1[829];	/* RESERVED	*/
+
+	volatile uint32_t SCB_CPUID;		/*The CPUID register (RO) contains the processor part number,
+										version, and implementation information*/
+
+	volatile uint32_t SCB_ICSR;			/*The ICSR
+	 	 	 	 	 	 	 	 	 	• Provides:
+											– A set-pending bit for the Non-Maskable Interrupt (NMI) exception
+											– Set-pending and clear-pending bits for the PendSV and SysTick exceptions
+										• Indicates:
+											– The exception number of the exception being processed
+											– Whether there are preempted active exceptions
+											– The exception number of the highest priority pending exception
+											– Whether any interrupts are pending*/
+
+	volatile uint32_t SCB_VTOR;		    /*It contains bits [29:9] of the offset of the table base
+	 	 	 	 	 	 	 	 	     from memory address 0x00000000*/
+
+	volatile uint32_t SCB_AIRCR;	    /*The AIRCR provides priority grouping control for the exception model,
+									    endian status for data accesses, and reset control of the system*/
+
+	volatile uint32_t SCB_SCR;		    /*The SCR controls features of entry to and exit from low power state*/
+
+	volatile uint32_t SCB_CCR;		    /*The CCR controls entry to Thread mode and enables:
+									    	• The handlers for NMI, hard fault and faults escalated by FAULTMASK to ignore bus faults
+									    	• Trapping of divide by zero and unaligned accesses
+									    	• Access to the STIR by unprivileged software,*/
+
+	volatile uint32_t SCB_SHPR[3];	    /*The SHPR1-SHPR3 registers set the priority level, 0 to 255 of the exception handlers that
+									    have configurable priority*/
+
+	volatile uint32_t SCB_SHCSR;		/*The SHCSR enables the system handlers, and indicates:
+											• The pending status of the bus fault, memory management fault, and SVC exceptions
+											• The active status of the system handlers*/
+
+	volatile uint32_t SCB_CFSR;			/*The CFSR indicates the cause of a memory management fault, bus fault, or usage fault*/
+
+	volatile uint32_t SCB_HFSR;			/*The HFSR gives information about events that activate the hard fault handler. */
+
+	volatile uint32_t RESERVED[2];		/*RESERVED*/
+
+	volatile uint32_t SCB_MMAR;			/*this field holds the address of the
+										location that generated the memory management fault*/
+
+	volatile uint32_t SCB_BFAR;			/*this field holds the address of the location
+										that generated the bus fault*/
+
+	volatile uint32_t SCB_AFSR;			/*The AFSR contains additional system fault information. */
+
+}SCB_REG_t;
+
+#define SCB 	((SCB_REG_t *)(SCB_BASE_ADDRESS))
+
 /************************     	PERIPHERAL REGISTER BITS DEFINITION	************************/
 
 
