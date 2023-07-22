@@ -1,11 +1,8 @@
-/*******************************************************************/
-/*******************************************************************/
-/********* OWNER     : Mohamed Wael				      **************/
-/********* DATE      : 1/5/2023					  	  **************/
-/********* FILE NAME : STM32446RExx.h				  **************/
-/********* Version   : V1.0                           **************/
-/*******************************************************************/
-/*******************************************************************/
+/*
+ *@file		:	STM32F446xx.h
+ *@author	: 	Mohamed Wael
+ *@brief	:	Main Registers definition for STM32F446xx MCU
+ */
 
 #ifndef STM32F446XX_H_
 #define STM32F446XX_H_
@@ -41,6 +38,8 @@
 /************************     	APB 1 BASE PERIPHERALS ADDRESSES	************************/
 
 /************************     	APB 2 BASE PERIPHERALS ADDRESSES	************************/
+#define EXTI_BASE_ADDRESS			0x40013C00UL
+#define SYSCFG_BASE_ADDRESS			0x40013800UL
 
 /************************     	GPIO REGISTERS DEFINITION			************************/
 
@@ -174,6 +173,54 @@ typedef struct {
 }SCB_REG_t;
 
 #define SCB 	((SCB_REG_t *)(SCB_BASE_ADDRESS))
+
+/************************     	EXTI REGISTERS DEFINITION		************************/
+
+typedef struct {
+
+	volatile uint32_t EXTI_IMR; /*Interrupt mask register, used to enable or disable EXTI Lines*/
+
+	volatile uint32_t EXTI_EMR; /*Event mask register ,used to enable or disable EXTI Lines*/
+
+	volatile uint32_t EXTI_RTSR;/*Rising trigger selection register ,Used enable rising edge trigger*/
+
+	volatile uint32_t EXTI_FTSR;/*Falling trigger selection register, Used enable falling edge trigger*/
+
+	volatile uint32_t EXTI_SWIER; /*Software interrupt event register,
+									If interrupt are enabled on line x in the EXTI_IMR register,
+									writing '1' to SWIERx bit when it is
+									set at '0' sets the corresponding pending bit in EXTI_PR register,
+ 	 	 	 	 	 	 	 	 	thus resulting in an interrupt request generation.*/
+
+	volatile uint32_t EXTI_PR;	 /* Pending register, used to read and clear Pending Flags state*/
+
+
+}EXTI_REG_t;
+#define EXTI 	((EXTI_REG_t*)(EXTI_BASE_ADDRESS))
+
+/************************     	SYSCFG REGISTERS DEFINITION		************************/
+
+typedef struct {
+
+	volatile uint32_t SYSCFG_MEMRMP;	/*This register is used for specific configurations on memory remap*/
+
+	volatile uint32_t SYSCFG_PMC;		/*SYSCFG peripheral mode configuration register */
+
+	volatile uint32_t SYSCFG_EXTICR[4]; /*SYSCFG external interrupt configuration register,
+										These Registers are written by software to select the
+										source input (PORT) for the EXTIx external interrupt*/
+
+	volatile uint32_t RESERVED1[2];
+
+	volatile uint32_t SYSCFG_CMPCR;		/*Compensation cell control register , Used to enable Compensation cell */
+
+	volatile uint32_t RESERVED2[2];
+
+	volatile uint32_t SYSCFG_CFGR;		/*SYSCFG configuration register */
+
+}SYSCFG_REG_t;
+#define SYSCFG 	((SYSCFG_REG_t*)(SYSCFG_BASE_ADDRESS))
+
 
 /************************     	PERIPHERAL REGISTER BITS DEFINITION	************************/
 
