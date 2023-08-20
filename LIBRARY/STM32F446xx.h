@@ -21,6 +21,7 @@
 #define SCB_BASE_ADDRESS			0xE000E008UL
 
 
+
 /************************     	AHB 1 BASE PERIPHERALS ADDRESSES	************************/
 #define GPIOA_BASE_ADDRESS			0x40020000UL
 #define GPIOB_BASE_ADDRESS          0x40020400UL
@@ -30,16 +31,25 @@
 #define GPIOF_BASE_ADDRESS          0x40021400UL
 #define GPIOG_BASE_ADDRESS          0x40021800UL
 #define GPIOH_BASE_ADDRESS          0x40021C00UL
+#define DMA1_BASE_ADDRESS    		0x40026000UL
+#define DMA2_BASE_ADDRESS    		0x40026400UL
 
 /************************     	AHB 2 BASE PERIPHERALS ADDRESSES	************************/
 
 /************************     	AHB 3 BASE PERIPHERALS ADDRESSES	************************/
 
 /************************     	APB 1 BASE PERIPHERALS ADDRESSES	************************/
-
+#define USART1_BASE_ADDRESS			0x40011000UL
+#define USART6_BASE_ADDRESS         0x40011400UL
 /************************     	APB 2 BASE PERIPHERALS ADDRESSES	************************/
 #define EXTI_BASE_ADDRESS			0x40013C00UL
+
 #define SYSCFG_BASE_ADDRESS			0x40013800UL
+
+#define USART2_BASE_ADDRESS			0x40004400UL
+#define USART3_BASE_ADDRESS         0x40004800UL
+#define UART4_BASE_ADDRESS          0x40004C00UL
+#define UART5_BASE_ADDRESS          0x40005000UL
 
 /************************     	GPIO REGISTERS DEFINITION			************************/
 
@@ -64,6 +74,20 @@ typedef struct {
 #define GPIOF               ((GPIO_RegDef_t *) (GPIOF_BASE_ADDRESS))
 #define GPIOG               ((GPIO_RegDef_t *) (GPIOG_BASE_ADDRESS))
 #define GPIOH               ((GPIO_RegDef_t *) (GPIOH_BASE_ADDRESS))
+
+/************************     	DMA REGISTERS DEFINITION			************************/
+
+typedef struct {
+
+	volatile uint32_t	LISR;		 	/*DMA low interrupt status register */
+	volatile uint32_t	HISR;		 	/*DMA high interrupt status register */
+	volatile uint32_t	LIFCR;		 	/*DMA low interrupt flag clear register*/
+	volatile uint32_t	HIFCR;		 	/*DMA high interrupt flag clear register*/
+	volatile uint32_t	STREAM[8][6];	/*8 Streams of 6 Registers 2D Array of Configuration Registers*/
+}DMA_REG_t;
+
+#define DMA1 			((DMA_REG_t	*) 	(DMA1_BASE_ADDRESS))
+#define DMA2 			((DMA_REG_t	*) 	(DMA2_BASE_ADDRESS))
 
 /************************     	SYSTICK REGISTERS DEFINITION		************************/
 
@@ -221,6 +245,25 @@ typedef struct {
 }SYSCFG_REG_t;
 #define SYSCFG 	((SYSCFG_REG_t*)(SYSCFG_BASE_ADDRESS))
 
+/************************     	UART/USART REGISTERS DEFINITION		************************/
+typedef struct {
+
+	volatile uint32_t USART_SR;			/*USART Status Register*/
+	volatile uint32_t USART_DR;			/*USART DATA REGISTER*/
+	volatile uint32_t USART_BRR;		/*USART BaudRate Register*/
+	volatile uint32_t USART_CR1;		/*USART Control Register 1*/
+	volatile uint32_t USART_CR2;		/*USART Control Register 2*/
+	volatile uint32_t USART_CR3;		/*USART Control Register 3*/
+	volatile uint32_t USART_GTPR		/*USART Guard Time and Prescaler Register*/
+	;
+}USART_REG_t;
+
+#define USART1				((USART_REG_t * )(USART1_BASE_ADDRESS))
+#define USART2				((USART_REG_t * )(USART2_BASE_ADDRESS))
+#define USART3				((USART_REG_t * )(USART3_BASE_ADDRESS))
+#define UART4				((USART_REG_t * )(UART4_BASE_ADDRESS))
+#define UART5				((USART_REG_t * )(UART5_BASE_ADDRESS))
+#define USART6				((USART_REG_t * )(USART6_BASE_ADDRESS))
 
 /************************     	PERIPHERAL REGISTER BITS DEFINITION	************************/
 
