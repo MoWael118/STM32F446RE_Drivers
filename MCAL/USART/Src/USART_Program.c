@@ -16,11 +16,8 @@
 
 /********************** MAIN PV ************************/
 
-/*USART1 and USART6 Registers array*/
-static USART_REG_t * USART_APB2[USART_APB2_NUMBER]={USART1,USART6};
-
-/*USART2,USART3,UART4,UART5 Registers array*/
-static USART_REG_t * USART_APB1[USART_APB1_NUMBER]={USART2,USART3,UART4,UART5};
+/*USARTs Registers array*/
+static USART_REG_t * USARTs[USART_NUMBERs]={USART1,USART2,USART3,UART4,UART5,USART6};
 
 /*2D array of USARTs Call back functions*/
 static void (*USART_pf_CallBackFuncs[USART_MAX_NUMBERS][USART_MAX_INTERRUPTS])(void)={NULL};
@@ -54,124 +51,62 @@ Error_State_t USART_Init(const USART_CONFIGS_t * USART_Configs)
 	/*Check USART Configurations*/
 	if (OK == USART_Check_Configs(USART_Configs))
 	{
-		/*Check USART number to access its Registers*/
-		if ((USART_Configs->USART_Num >= USART_NUMBER_USART2)&&(USART_Configs->USART_Num <= USART_NUMBER_UART5))
+		/*Enable USART*/
+		USARTs[USART_Configs->USART_Num]->USART_CR1 |= (1<<USART_ENABLE_BIT_START);
+		/*1- Set Parity State*/
+		USARTs[USART_Configs->USART_Num]->USART_CR1 &= ~(PARITY_BIT_MASK<<PARITY_BIT_START);
+		USARTs[USART_Configs->USART_Num]->USART_CR1 |=  (USART_Configs->Parity_State<<PARITY_BIT_START);
+		/*2- Set Parity type if Parity state is enabled*/
+		if (USART_Configs->Parity_State == PARITY_STATE_PARITY_ENABLED)
 		{
-			/*Enable USART*/
-			USART_APB1[USART_Configs->USART_Num]->USART_CR1 |= (1<<USART_ENABLE_BIT_START);
-			/*1- Set Parity State*/
-			USART_APB1[USART_Configs->USART_Num]->USART_CR1 &= ~(PARITY_BIT_MASK<<PARITY_BIT_START);
-			USART_APB1[USART_Configs->USART_Num]->USART_CR1 |=  (USART_Configs->Parity_State<<PARITY_BIT_START);
-			/*2- Set Parity type if Parity state is enabled*/
-			if (USART_Configs->Parity_State == PARITY_STATE_PARITY_ENABLED)
-			{
-				USART_APB1[USART_Configs->USART_Num]->USART_CR1 &= ~(PARITY_TYPE_MASK<<PARITY_TYPE_START);
-				USART_APB1[USART_Configs->USART_Num]->USART_CR1 |=  (USART_Configs->Parity_Type<<PARITY_TYPE_START);
-			}
-			/*3- Set Stop bits Number*/
-			USART_APB1[USART_Configs->USART_Num]->USART_CR2 &= ~(STOP_BITS_MASK<<STOP_BITS_START);
-			USART_APB1[USART_Configs->USART_Num]->USART_CR2 |=  (USART_Configs->StopBits_Num<<STOP_BITS_START);
-			/*4- Set Word Length Size*/
-			USART_APB1[USART_Configs->USART_Num]->USART_CR1 &= ~(WORD_LENGTH_BIT_MASK<<WORD_LENGTH_BIT_START);
-			USART_APB1[USART_Configs->USART_Num]->USART_CR1 |=  (USART_Configs->Word_Length<<WORD_LENGTH_BIT_START);
-			/*5- Set Mode Type*/
-			if (USART_Configs->Mode_Type == MODE_TYPE_RX)
-			{
-				/*Disable TX Circuit*/
-				USART_APB1[USART_Configs->USART_Num]->USART_CR1 &= ~(1<<TX_BIT_START);
-				/*Enable RX Circuit*/
-				USART_APB1[USART_Configs->USART_Num]->USART_CR1 |= (1<<RX_BIT_START);
-			}
-			else if (USART_Configs->Mode_Type == MODE_TYPE_TX)
-			{
-				/*Enable TX Circuit*/
-				USART_APB1[USART_Configs->USART_Num]->USART_CR1 |=  (1<<TX_BIT_START);
-				/*Disable RX Circuit*/
-				USART_APB1[USART_Configs->USART_Num]->USART_CR1 &= ~(1<<RX_BIT_START);
-			}
-			else if (USART_Configs->Mode_Type == MODE_TYPE_RXandTX){
-				/*Enable TX Circuit*/
-				USART_APB1[USART_Configs->USART_Num]->USART_CR1 |=  (1<<TX_BIT_START);
-				/*Disable RX Circuit*/
-				USART_APB1[USART_Configs->USART_Num]->USART_CR1 |=  (1<<RX_BIT_START);
-			}
-			/*6- Set OverSampling state*/
-
-			USART_APB1[USART_Configs->USART_Num]->USART_CR3 &= ~(1<<OVERSAMPLING_STATE_BIT_START);
-			USART_APB1[USART_Configs->USART_Num]->USART_CR3 |=  (USART_Configs->OverSampling_State<<OVERSAMPLING_STATE_BIT_START);
-
-			/*7- Set OverSampling Value*/
-
-			USART_APB1[USART_Configs->USART_Num]->USART_CR1 &= ~(1<<OVERSAMPLING_VALUE_BIT_START);
-			USART_APB1[USART_Configs->USART_Num]->USART_CR1 |=  (USART_Configs->OverSampling_Value<<OVERSAMPLING_VALUE_BIT_START);
-
-			/*8- Set HW Flow control mode state*/
-			/*set CTS*/
-			USART_APB1[USART_Configs->USART_Num]->USART_CR3 &= ~(1<<CTS_BIT_START);
-			USART_APB1[USART_Configs->USART_Num]->USART_CR3 |= (USART_Configs->HWFlow_Control_Mode<<CTS_BIT_START);
-			/*set RTS*/
-			USART_APB1[USART_Configs->USART_Num]->USART_CR3 &= ~(1<<RTS_BIT_START);
-			USART_APB1[USART_Configs->USART_Num]->USART_CR3 |= (USART_Configs->HWFlow_Control_Mode<<RTS_BIT_START);
+			USARTs[USART_Configs->USART_Num]->USART_CR1 &= ~(PARITY_TYPE_MASK<<PARITY_TYPE_START);
+			USARTs[USART_Configs->USART_Num]->USART_CR1 |=  (USART_Configs->Parity_Type<<PARITY_TYPE_START);
 		}
-		else if ((USART_Configs->USART_Num == USART_NUMBER_USART1)||(USART_Configs->USART_Num == USART_NUMBER_USART6))
+		/*3- Set Stop bits Number*/
+		USARTs[USART_Configs->USART_Num]->USART_CR2 &= ~(STOP_BITS_MASK<<STOP_BITS_START);
+		USARTs[USART_Configs->USART_Num]->USART_CR2 |=  (USART_Configs->StopBits_Num<<STOP_BITS_START);
+		/*4- Set Word Length Size*/
+		USARTs[USART_Configs->USART_Num]->USART_CR1 &= ~(WORD_LENGTH_BIT_MASK<<WORD_LENGTH_BIT_START);
+		USARTs[USART_Configs->USART_Num]->USART_CR1 |=  (USART_Configs->Word_Length<<WORD_LENGTH_BIT_START);
+		/*5- Set Mode Type*/
+		if (USART_Configs->Mode_Type == MODE_TYPE_RX)
 		{
-			/*Enable USART*/
-			USART_APB2[USART_Configs->USART_Num-4]->USART_CR1 |= (1<<USART_ENABLE_BIT_START);
-			/*1- Set Parity State*/
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 &= ~(PARITY_BIT_MASK<<PARITY_BIT_START);
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 |=  (USART_Configs->Parity_State<<PARITY_BIT_START);
-			/*2- Set Parity type if Parity state is enabled*/
-			if (USART_Configs->Parity_State == PARITY_STATE_PARITY_ENABLED)
-			{
-				USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 &= ~(PARITY_TYPE_MASK<<PARITY_TYPE_START);
-				USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 |=  (USART_Configs->Parity_Type<<PARITY_TYPE_START);
-			}
-			/*3- Set Stop bits Number*/
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR2 &= ~(STOP_BITS_MASK<<STOP_BITS_START);
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR2 |=  (USART_Configs->StopBits_Num<<STOP_BITS_START);
-			/*4- Set Word Length Size*/
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 &= ~(WORD_LENGTH_BIT_MASK<<WORD_LENGTH_BIT_START);
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 |=  (USART_Configs->Word_Length<<WORD_LENGTH_BIT_START);
-			/*5- Set Mode Type*/
-			if (USART_Configs->Mode_Type == MODE_TYPE_RX)
-			{
-				/*Disable TX Circuit*/
-				USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 &= ~(1<<TX_BIT_START);
-				/*Enable RX Circuit*/
-				USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 |= (1<<RX_BIT_START);
-			}
-			else if (USART_Configs->Mode_Type == MODE_TYPE_TX)
-			{
-				/*Enable TX Circuit*/
-				USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 |=  (1<<TX_BIT_START);
-				/*Disable RX Circuit*/
-				USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 &= ~(1<<RX_BIT_START);
-			}
-			else if (USART_Configs->Mode_Type == MODE_TYPE_RXandTX){
-				/*Enable TX Circuit*/
-				USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 |=  (1<<TX_BIT_START);
-				/*ENABLE RX Circuit*/
-				USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 |=  (1<<RX_BIT_START);
-			}
-			/*6- Set OverSampling state*/
-
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR3 &= ~(1<<OVERSAMPLING_STATE_BIT_START);
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR3 |=  (USART_Configs->OverSampling_State<<OVERSAMPLING_STATE_BIT_START);
-
-			/*7- Set OverSampling Value*/
-
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 &= ~(1<<OVERSAMPLING_VALUE_BIT_START);
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR1 |=  (USART_Configs->OverSampling_Value<<OVERSAMPLING_VALUE_BIT_START);
-
-			/*8- Set HW Flow control mode state*/
-			/*set CTS*/
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR3 &= ~(1<<CTS_BIT_START);
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR3 |= (USART_Configs->HWFlow_Control_Mode<<CTS_BIT_START);
-			/*set RTS*/
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR3 &= ~(1<<RTS_BIT_START);
-			USART_APB2[(USART_Configs->USART_Num)-4]->USART_CR3 |= (USART_Configs->HWFlow_Control_Mode<<RTS_BIT_START);
-
+			/*Disable TX Circuit*/
+			USARTs[USART_Configs->USART_Num]->USART_CR1 &= ~(1<<TX_BIT_START);
+			/*Enable RX Circuit*/
+			USARTs[USART_Configs->USART_Num]->USART_CR1 |= (1<<RX_BIT_START);
 		}
+		else if (USART_Configs->Mode_Type == MODE_TYPE_TX)
+		{
+			/*Enable TX Circuit*/
+			USARTs[USART_Configs->USART_Num]->USART_CR1 |=  (1<<TX_BIT_START);
+			/*Disable RX Circuit*/
+			USARTs[USART_Configs->USART_Num]->USART_CR1 &= ~(1<<RX_BIT_START);
+		}
+		else if (USART_Configs->Mode_Type == MODE_TYPE_RXandTX){
+			/*Enable TX Circuit*/
+			USARTs[USART_Configs->USART_Num]->USART_CR1 |=  (1<<TX_BIT_START);
+			/*Disable RX Circuit*/
+			USARTs[USART_Configs->USART_Num]->USART_CR1 |=  (1<<RX_BIT_START);
+		}
+		/*6- Set OverSampling state*/
+
+		USARTs[USART_Configs->USART_Num]->USART_CR3 &= ~(1<<OVERSAMPLING_STATE_BIT_START);
+		USARTs[USART_Configs->USART_Num]->USART_CR3 |=  (USART_Configs->OverSampling_State<<OVERSAMPLING_STATE_BIT_START);
+
+		/*7- Set OverSampling Value*/
+
+		USARTs[USART_Configs->USART_Num]->USART_CR1 &= ~(1<<OVERSAMPLING_VALUE_BIT_START);
+		USARTs[USART_Configs->USART_Num]->USART_CR1 |=  (USART_Configs->OverSampling_Value<<OVERSAMPLING_VALUE_BIT_START);
+
+		/*8- Set HW Flow control mode state*/
+		/*set CTS*/
+		USARTs[USART_Configs->USART_Num]->USART_CR3 &= ~(1<<CTS_BIT_START);
+		USARTs[USART_Configs->USART_Num]->USART_CR3 |= (USART_Configs->HWFlow_Control_Mode<<CTS_BIT_START);
+		/*set RTS*/
+		USARTs[USART_Configs->USART_Num]->USART_CR3 &= ~(1<<RTS_BIT_START);
+		USARTs[USART_Configs->USART_Num]->USART_CR3 |= (USART_Configs->HWFlow_Control_Mode<<RTS_BIT_START);
+
 		/*9- Set Baud Rate*/
 		USART_SetBaudRate((USART_Configs->BaudRate_Value), (USART_Configs->USART_Clock_Value),(USART_Configs->OverSampling_Value),(USART_Configs->USART_Num));
 	}
@@ -192,23 +127,14 @@ Error_State_t USART_SendCharPolling(USART_NUMBER_t USART_Num , uint8_t Character
 {
 	Error_State_t Error_State=OK;
 
-	if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+	if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 	{
 		/*wait till DR is Empty*/
-		while (!(GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_TXE)));
+		while (!(GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_TXE)));
 		/*Store data in the DR Register*/
-		USART_APB1[USART_Num]->USART_DR = Character;
+		USARTs[USART_Num]->USART_DR = Character;
 		/*wait till Transmission is complete*/
-		while (!(GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_TC)));
-	}
-	else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-	{
-		/*wait till DR is Empty*/
-		while (!(GET_BIT(USART_APB2[USART_Num-4]->USART_SR,USART_FLAG_TXE)));
-		/*Store data in the DR Register*/
-		USART_APB2[USART_Num-4]->USART_DR = Character;
-		/*wait till Transmission is complete*/
-		while (!(GET_BIT(USART_APB2[USART_Num-4]->USART_SR,USART_FLAG_TC)));
+		while (!(GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_TC)));
 	}
 	else {
 		Error_State = USART_WRONG_NUMBER;
@@ -232,23 +158,14 @@ Error_State_t USART_SendStringPolling(USART_NUMBER_t USART_Num , const char* Str
 	{
 		while (String[Counter] != '\0')
 		{
-			if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+			if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 			{
 				/*wait till DR is Empty*/
-				while (!(GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_TXE)));
+				while (!(GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_TXE)));
 				/*Store data in the DR Register*/
-				USART_APB1[USART_Num]->USART_DR = String[Counter];
+				USARTs[USART_Num]->USART_DR = String[Counter];
 				/*wait till Transmission is complete*/
-				while (!(GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_TC)));
-			}
-			else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-			{
-				/*wait till DR is Empty*/
-				while (!(GET_BIT(USART_APB2[USART_Num-4]->USART_SR,USART_FLAG_TXE)));
-				/*Store data in the DR Register*/
-				USART_APB2[USART_Num-4]->USART_DR = String[Counter];
-				/*wait till Transmission is complete*/
-				while (!(GET_BIT(USART_APB2[USART_Num-4]->USART_SR,USART_FLAG_TC)));
+				while (!(GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_TC)));
 			}
 			else {
 				Error_State = USART_WRONG_NUMBER;
@@ -275,22 +192,15 @@ Error_State_t USART_ReceiveCharPolling(USART_NUMBER_t USART_Num , uint16_t * Cha
 	Error_State_t Error_State = OK;
 	if (NULL != Character)
 	{
-		if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+		if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 		{
 			/*Wait till the Received data is ready to be read*/
-			while (!GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_RXNE));
+			while (!GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_RXNE));
 
 			/*Read the data*/
-			*Character = USART_APB1[USART_Num]->USART_DR;
+			*Character = USARTs[USART_Num]->USART_DR;
 		}
-		else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-		{
-			/*Wait till the Received data is ready to be read*/
-			while (!GET_BIT(USART_APB2[USART_Num-4]->USART_SR,USART_FLAG_RXNE));
 
-			/*Read the data*/
-			*Character = USART_APB2[USART_Num-4]->USART_DR;
-		}
 		else {
 			Error_State = USART_WRONG_NUMBER;
 		}
@@ -318,22 +228,13 @@ Error_State_t USART_ReceiveBUFFERPolling(USART_NUMBER_t USART_Num , uint16_t * R
 	{
 		while (Counter<Buffer_Size)
 		{
-			if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+			if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 			{
 				/*Wait until first word (8 bits or 9 bits) received*/
-				while (!GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_RXNE));
+				while (!GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_RXNE));
 
 				/*Read the first word*/
-				Receiving_Buffer[Counter]= USART_APB1[USART_Num]->USART_DR;
-			}
-			else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-			{
-				/*Wait until first word (8 bits or 9 bits) received*/
-				while (!GET_BIT(USART_APB2[USART_Num-4]->USART_SR,USART_FLAG_RXNE));
-
-				/*Read the first word*/
-				Receiving_Buffer[Counter]= USART_APB2[USART_Num-4]->USART_DR;
-
+				Receiving_Buffer[Counter]= USARTs[USART_Num]->USART_DR;
 			}
 			else {
 				Error_State = USART_WRONG_NUMBER;
@@ -372,34 +273,20 @@ Error_State_t USART_SendCharIT(USART_NUMBER_t USART_Num , uint8_t Character ,voi
 		IRQ_Source[USART_Num] = SOURCE_TxD;
 
 		/*Check Which USART is selected*/
-		if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+		if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 		{
 			/*wait till Transmit data register is empty*/
 			while (!Flag_State)
 			{
-				Flag_State = GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_TXE);
+				Flag_State = GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_TXE);
 			}
 
 			/*Send the data*/
-			USART_APB1[USART_Num]->USART_DR  = Character;
+			USARTs[USART_Num]->USART_DR  = Character;
 
 			/*Enable Transfer Complete Interrupt*/
-			USART_APB1[USART_Num]->USART_CR1 |= (1<<USART_INTERRUPT_TCIE);
+			USARTs[USART_Num]->USART_CR1 |= (1<<USART_INTERRUPT_TCIE);
 
-		}
-		else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-		{
-
-			/*wait till Transmit data register is empty*/
-			while (!Flag_State)
-			{
-				Flag_State = GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_TXE);
-			}
-			/*Send the data*/
-			USART_APB2[USART_Num-4]->USART_DR  = Character;
-
-			/*Enable Transfer Complete Interrupt*/
-			USART_APB2[USART_Num-4]->USART_CR1 |= (1<<USART_INTERRUPT_TCIE);
 		}
 		else {
 			Error_State = USART_WRONG_NUMBER;
@@ -441,27 +328,19 @@ Error_State_t USART_SendBufferIT(USART_NUMBER_t USART_Num , uint8_t * Data_Buffe
 		Global_Data_Size = Buffer_Size;
 
 		/*Check Which USART is selected*/
-		if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+		if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 		{
 			/*wait till Transmit data register is empty*/
 			while (!Flag_State)
 			{
-				Flag_State = GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_TXE);
+				Flag_State = GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_TXE);
 			}
 			/*Send First Data element of the buffer*/
-			USART_APB1[USART_Num]->USART_DR  = Data_Buffer[0];
+			USARTs[USART_Num]->USART_DR  = Data_Buffer[0];
 
 			/*Enable Transfer Complete Interrupt*/
-			USART_APB1[USART_Num]->USART_CR1 |= (1<<USART_INTERRUPT_TCIE);
+			USARTs[USART_Num]->USART_CR1 |= (1<<USART_INTERRUPT_TCIE);
 
-		}
-		else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-		{
-			/*Send First Data element of the buffer*/
-			USART_APB2[USART_Num-4]->USART_DR  = Data_Buffer[0];
-
-			/*Enable Transfer Complete Interrupt*/
-			USART_APB2[USART_Num-4]->USART_CR1 |= (1<<USART_INTERRUPT_TCIE);
 		}
 		else {
 			Error_State = USART_WRONG_NUMBER;
@@ -497,15 +376,10 @@ Error_State_t USART_ReceiveCharIT(USART_NUMBER_t USART_Num , uint8_t* Character 
 		Global_Received_Data = Character ;
 
 		/*Check Which USART is selected*/
-		if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+		if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 		{
 			/*Enable Receive Not Empty Interrupt*/
-			USART_APB1[USART_Num]->USART_CR1 |= (1<<USART_INTERRUPT_RXNEIE);
-		}
-		else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-		{
-			/*Enable Receive Not Empty Interrupt*/
-			USART_APB2[USART_Num-4]->USART_CR1 |= (1<<USART_INTERRUPT_RXNEIE);
+			USARTs[USART_Num]->USART_CR1 |= (1<<USART_INTERRUPT_RXNEIE);
 		}
 		else {
 			Error_State = USART_WRONG_NUMBER;
@@ -546,15 +420,10 @@ Error_State_t USART_ReceiveBufferIT(USART_NUMBER_t USART_Num , uint8_t * Data_Bu
 		Global_Data_Size = Buffer_Size;
 
 		/*Check Which USART is selected*/
-		if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+		if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 		{
 			/*Enable Receive Not Empty Interrupt*/
-			USART_APB1[USART_Num]->USART_CR1 |= (1<<USART_INTERRUPT_RXNEIE);
-		}
-		else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-		{
-			/*Enable Receive Not Empty Interrupt*/
-			USART_APB2[USART_Num-4]->USART_CR1 |= (1<<USART_INTERRUPT_RXNEIE);
+			USARTs[USART_Num]->USART_CR1 |= (1<<USART_INTERRUPT_RXNEIE);
 		}
 		else {
 			Error_State = USART_WRONG_NUMBER;
@@ -577,15 +446,10 @@ Error_State_t USART_Enable_DMA_RX(USART_NUMBER_t USART_Num)
 	Error_State_t Error_State = OK;
 
 	/*Check Which USART is selected*/
-	if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+	if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 	{
 		/*Enable DMA RX Line*/
-		USART_APB1[USART_Num]->USART_CR3 |= (1<<DMAR_ENABLE);
-	}
-	else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-	{
-		/*Enable DMA RX Line*/
-		USART_APB2[USART_Num-4]->USART_CR3 |= (1<<DMAR_ENABLE);
+		USARTs[USART_Num]->USART_CR3 |= (1<<DMAR_ENABLE);
 	}
 	else {
 		Error_State = USART_WRONG_NUMBER;
@@ -604,15 +468,10 @@ Error_State_t USART_Enable_DMA_TX(USART_NUMBER_t USART_Num)
 	Error_State_t Error_State = OK;
 
 	/*Check Which USART is selected*/
-	if ((USART_Num >= USART_NUMBER_USART2) && (USART_Num <= USART_NUMBER_UART5))
+	if ((USART_Num >= USART_NUMBER_USART1) && (USART_Num <= USART_NUMBER_USART6))
 	{
 		/*Enable DMA RX Line*/
-		USART_APB1[USART_Num]->USART_CR3 |= (1<<DMAT_ENABLE);
-	}
-	else if ((USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6) )
-	{
-		/*Enable DMA RX Line*/
-		USART_APB2[USART_Num-4]->USART_CR3 |= (1<<DMAT_ENABLE);
+		USARTs[USART_Num]->USART_CR3 |= (1<<DMAT_ENABLE);
 	}
 	else {
 		Error_State = USART_WRONG_NUMBER;
@@ -632,7 +491,7 @@ static Error_State_t USART_Check_Configs(const USART_CONFIGS_t * USART_Configs)
 
 	if (NULL != USART_Configs)
 	{
-		if ((USART_Configs -> USART_Num >= USART_NUMBER_USART2) && (USART_Configs -> USART_Num <= USART_NUMBER_USART6))
+		if ((USART_Configs -> USART_Num >= USART_NUMBER_USART1) && (USART_Configs -> USART_Num <= USART_NUMBER_USART6))
 		{
 			if ((PARITY_STATE_NO_PARITY==USART_Configs->Parity_State)||((PARITY_STATE_PARITY_ENABLED==USART_Configs->Parity_State)))
 			{
@@ -703,19 +562,11 @@ static void USART_SetBaudRate(uint32_t BaudRate_Value , uint32_t Clock_Value , u
 	else {
 		Division_Factor = ((Division_Factor * 8)+500)/1000;
 	}
+	/*Set the value in BRR Register*/
+	USARTs[USART_Num]->USART_BRR  = 0 ;
+	USARTs[USART_Num]->USART_BRR |= (Division_Factor)  ;
+	USARTs[USART_Num]->USART_BRR |= (Mantessa_Part<<4)  ;
 
-	if ( (USART_Num == USART_NUMBER_USART1) || (USART_Num == USART_NUMBER_USART6))
-	{
-		USART_APB2[USART_Num-4]->USART_BRR  = 0 ;
-		USART_APB2[USART_Num-4]->USART_BRR |= (Division_Factor)  ;
-		USART_APB2[USART_Num-4]->USART_BRR |= (Mantessa_Part<<4)  ;
-
-	}
-	else {
-		USART_APB1[USART_Num]->USART_BRR  = 0 ;
-		USART_APB1[USART_Num]->USART_BRR |= (Division_Factor)  ;
-		USART_APB1[USART_Num]->USART_BRR |= (Mantessa_Part<<4)  ;
-	}
 
 
 }
@@ -725,14 +576,10 @@ static void USART_IRQ_Source_HANDLE(USART_NUMBER_t USART_Num)
 	uint8_t Flag_State=0;
 	if (IRQ_Source[USART_Num]==SOURCE_TxD)
 	{
-		/*Check Which USART And Disable the TC Interrupt*/
-		if ((USART_Num >= USART_NUMBER_USART2)&&(USART_Num <= USART_NUMBER_UART5))
-		{
-			CLR_BIT(USART_APB1[USART_Num]->USART_CR1 , USART_INTERRUPT_TCIE);
-		}
-		else {
-			CLR_BIT(USART_APB2[USART_Num-4]->USART_CR1 , USART_INTERRUPT_TCIE);
-		}
+		/*Disable the TC Interrupt*/
+
+		CLR_BIT(USARTs[USART_Num]->USART_CR1 , USART_INTERRUPT_TCIE);
+
 		/*Clear the Source*/
 		IRQ_Source[USART_Num]= NO_SOURCE;
 
@@ -749,40 +596,18 @@ static void USART_IRQ_Source_HANDLE(USART_NUMBER_t USART_Num)
 		/*wait till Transmit data register is empty*/
 		while (!Flag_State)
 		{
-			/*Check which USART Group and Read the Flag*/
-			if ((USART_Num >= USART_NUMBER_USART2)&&(USART_Num <= USART_NUMBER_UART5))
-			{
-				Flag_State = GET_BIT(USART_APB1[USART_Num]->USART_SR,USART_FLAG_TXE);
-			}
-			else {
-				Flag_State = GET_BIT(USART_APB2[USART_Num-4]->USART_SR,USART_FLAG_TXE);
-			}
-
+			/*Read the Flag*/
+			Flag_State = GET_BIT(USARTs[USART_Num]->USART_SR,USART_FLAG_TXE);
 		}
-		/*Check which USART Group and Send the next data element*/
-		if ((USART_Num >= USART_NUMBER_USART2)&&(USART_Num <= USART_NUMBER_UART5))
-		{
 			/*Send the Next Data Element*/
-			USART_APB1[USART_Num]->USART_DR = Global_Data_Buffer[Counter];
+			USARTs[USART_Num]->USART_DR = Global_Data_Buffer[Counter];
 			Counter++;
-		}
-		else {
-			/*Send the Next Data Element*/
-			USART_APB2[USART_Num-4]->USART_DR = Global_Data_Buffer[Counter];
-			Counter++;
-		}
 
 		/*data buffer sent completely*/
 		if (Counter == Global_Data_Size)
 		{
-			/*Check Which USART And Disable TC the Interrupt*/
-			if ((USART_Num >= USART_NUMBER_USART2)&&(USART_Num <= USART_NUMBER_UART5))
-			{
-				CLR_BIT(USART_APB1[USART_Num]->USART_CR1 , USART_INTERRUPT_TCIE);
-			}
-			else {
-				CLR_BIT(USART_APB2[USART_Num-4]->USART_CR1 , USART_INTERRUPT_TCIE);
-			}
+			/*Disable TC the Interrupt*/
+				CLR_BIT(USARTs[USART_Num]->USART_CR1 , USART_INTERRUPT_TCIE);
 
 			/*Clear the Source*/
 			IRQ_Source[USART_Num]= NO_SOURCE;
@@ -796,25 +621,14 @@ static void USART_IRQ_Source_HANDLE(USART_NUMBER_t USART_Num)
 	}
 	else if (IRQ_Source[USART_NUMBER_USART2]==SOURCE_RxD)
 	{
-		/*Check Which USART And Disable RXNE the Interrupt*/
-		if ((USART_Num >= USART_NUMBER_USART2)&&(USART_Num <= USART_NUMBER_UART5))
-		{
-			CLR_BIT(USART_APB1[USART_Num]->USART_CR1 , USART_INTERRUPT_RXNEIE);
-		}
-		else {
-			CLR_BIT(USART_APB2[USART_Num-4]->USART_CR1 , USART_INTERRUPT_RXNEIE);
-		}
+		/*Disable RXNE the Interrupt*/
+			CLR_BIT(USARTs[USART_Num]->USART_CR1 , USART_INTERRUPT_RXNEIE);
+
 		/*Clear the IRQ Source*/
 		IRQ_Source[USART_Num]= NO_SOURCE;
 
-		/*Check Which USART Group and Read the Received data*/
-		if ((USART_Num >= USART_NUMBER_USART2)&&(USART_Num <= USART_NUMBER_UART5))
-		{
-			*Global_Received_Data = USART_APB1[USART_Num]->USART_DR ;
-		}
-		else {
-			*Global_Received_Data = USART_APB2[USART_Num-4]->USART_DR ;
-		}
+		/*Read the Received data*/
+			*Global_Received_Data = USARTs[USART_Num]->USART_DR ;
 
 		/*Call the CALLBACK Function*/
 		if (NULL != USART_pf_CallBackFuncs[USART_Num][USART_CALLBACKS_RXNEI])
@@ -827,27 +641,16 @@ static void USART_IRQ_Source_HANDLE(USART_NUMBER_t USART_Num)
 		/*Counter variable to move on the buffer elements*/
 		static uint8_t Counter=0;
 
-		/*Check Which USART Group and Read the Received data element*/
-		if ((USART_Num >= USART_NUMBER_USART2)&&(USART_Num <= USART_NUMBER_UART5))
-		{
-			Global_Data_Buffer[Counter++] = USART_APB1[USART_Num]->USART_DR ;
-		}
-		else {
-			Global_Data_Buffer[Counter++] = USART_APB2[USART_Num-4]->USART_DR ;
-		}
+		/*Read the Received data element*/
+		Global_Data_Buffer[Counter++] = USARTs[USART_Num]->USART_DR ;
 
 		/*The total Buffer received completely*/
 		if (Counter == Global_Data_Size)
 		{
 
-			/*Check Which USART And Disable the RXNE Interrupt*/
-			if ((USART_Num >= USART_NUMBER_USART2)&&(USART_Num <= USART_NUMBER_UART5))
-			{
-				CLR_BIT(USART_APB1[USART_Num]->USART_CR1 , USART_INTERRUPT_RXNEIE);
-			}
-			else {
-				CLR_BIT(USART_APB2[USART_Num-4]->USART_CR1 , USART_INTERRUPT_RXNEIE);
-			}
+			/*Disable the RXNE Interrupt*/
+
+			CLR_BIT(USARTs[USART_Num]->USART_CR1 , USART_INTERRUPT_RXNEIE);
 
 			/*Clear the IRQ Source*/
 			IRQ_Source[USART_Num]= NO_SOURCE;

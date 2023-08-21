@@ -41,8 +41,7 @@ static void USART_IRQ_Source_HANDLE(USART_NUMBER_t USART_Num);
 
 
 /*****************Private Defines***********************/
-#define USART_APB2_NUMBER	2
-#define USART_APB1_NUMBER	4
+#define USART_NUMBERs	6
 
 #define PARITY_BIT_MASK		1u
 #define PARITY_BIT_START	10u
